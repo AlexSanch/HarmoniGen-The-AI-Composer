@@ -1,0 +1,58 @@
+name: harmony
+services:
+    midi-api:
+        image: harmony-midi-api
+        build:
+            context: ./midi-gen
+            dockerfile: Dockerfile
+        ports:
+            - "8083:8083"
+        networks:
+            harmonynet:
+                ipv4_address: 172.20.0.2
+        depends_on:
+            - llama_cpp
+
+    nextjs:
+        image: harmony-nextjs
+        build:
+            context: ./nextjs-docker
+            dockerfile: Dockerfile
+        ports:
+            - "3000:3000"
+        networks:
+            harmonynet:
+                ipv4_address: 172.20.0.3
+        depends_on:
+            - llama_cpp
+            - midi-api
+
+    llama_cpp:
+        ports:
+            - "8080:8080"
+        runtime: nvidia
+        volumes:
+            - /tmp/argus_socket:/tmp/argus_socket
+            - /etc/enctune.conf:/etc/enctune.conf
+            - /etc/nv_tegra_release:/etc/nv_tegra_release
+            - /tmp/nv_jetson_model:/tmp/nv_jetson_model
+            - /var/run/dbus:/var/run/dbus
+            - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
+            - /home/altaga/jetson-containers/data:/data
+            - /home/altaga/workstation/llama/model:/model
+        devices:
+            - /dev/snd
+            - /dev/bus/usb
+        working_dir: /opt/llama.cpp/bin
+        image: dustynv/llama_cpp:r36.2.0
+        command: /bin/bash -c "./server --model /model/llama-2-7b.Q5_K_M.gguf --ctx-size 512 --batch-size 256 --n-gpu-layers 999 --threads $(nproc) --n-predict 512 --host 172.20.0.4 --port 8080 --alias HarmoniGen"
+        networks:
+            harmonynet:
+                ipv4_address: 172.20.0.4
+
+networks:
+    harmonynet:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.20.0.0/16
