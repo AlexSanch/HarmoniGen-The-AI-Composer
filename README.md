@@ -183,7 +183,7 @@ Los archivos que utilizamos en este proyecto como POC son los siguientes.
 
 Ya que podemos generar los audios de forma programatica, es mejor tener la capacidad de hacerlo mediante una API, ya que esto failitara la integracion con nuestra interfaz grafica, asi que se utilizo Flask para crear una API.
 
-<img src="https://i.ibb.co/L9GwPrc/image.png" width="700">
+<img src="https://i.ibb.co/F7RTDcN/68747470733a2f2f692e6962622e636f2f4c3947775072632f.png" width="700">
 
 Dentro de la aplicacion este microservicio esta corriendo en el puerto 8083 con una ip interna estatica.
 
