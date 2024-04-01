@@ -26,7 +26,13 @@ https://musescore.com/
 
 # Introduction:
 
+En el vasto mundo de la producción musical, puede parecer un desafío abrumador dominar todos los conceptos de teoría musical que la respaldan, además de enfrentarse al hardware y trabajo necesarios detrás de todo este proceso.
 
+<img src="https://i.ibb.co/Dg3DN9F/Image.png" width="700">
+
+Sin embargo con el continuo avance de la tecnología, la incorporación de la GAI (Generative Artificial Intelligence) y el procesamiento en GPU ha abierto un abanico de posibilidades para lograr que el arte de la composición musical este al alcance de todos, permitiendo que un espectro más amplio y diverso de personas acceda a él, por eso les presento mi proyecto HarmoniGen The AI Composer. 
+
+<img src="https://i.ibb.co/C8WnYwz/image.png" width="700">
 
 # Solution:
 
