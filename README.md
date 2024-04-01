@@ -297,7 +297,7 @@ Una vez generado el archivo ya podemos reproducirlo en el mismo navegador y usar
 ### Epic DEMO:
 
 Video: Click on the image
-[![Video](https://i.ibb.co/HF2PRKZ/VidSynth.png)](pending...)
+[![Video](https://i.ibb.co/ZSSjZtF/Harmoni.png)](pending...)
 
 Sorry github does not allow embed videos.
 
