@@ -38,8 +38,8 @@ services:
             - /tmp/nv_jetson_model:/tmp/nv_jetson_model
             - /var/run/dbus:/var/run/dbus
             - /var/run/avahi-daemon/socket:/var/run/avahi-daemon/socket
-            - /home/altaga/jetson-containers/data:/data
-            - /home/altaga/workstation/llama/model:/model
+            - /home/alex/jetson-containers/data:/data
+            - /home/alex/workstation/llama/model:/model
         devices:
             - /dev/snd
             - /dev/bus/usb
