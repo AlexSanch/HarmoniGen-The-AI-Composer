@@ -23,7 +23,7 @@ https://nextjs.org/
 https://www.fluidsynth.org/
 - Musescore
 https://musescore.com/
-
+=
 # Introduction:
 
 En el vasto mundo de la producción musical, puede parecer un desafío abrumador dominar todos los conceptos de teoría musical que la respaldan, además de enfrentarse al hardware y trabajo necesarios detrás de todo este proceso.
