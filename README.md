@@ -26,17 +26,17 @@ https://musescore.com/
 =
 # Introduction:
 
-En el vasto mundo de la producción musical, puede parecer un desafío abrumador dominar todos los conceptos de teoría musical que la respaldan, además de enfrentarse al hardware y trabajo necesarios detrás de todo este proceso.
+In the vast world of music production, it can seem like a daunting challenge to master all of the music theory concepts behind it, as well as deal with the hardware and work required behind this entire process.
 
 <img src="https://i.ibb.co/Dg3DN9F/Image.png" width="700">
 
-Sin embargo con el continuo avance de la tecnología, la incorporación de la GAI (Generative Artificial Intelligence) y el procesamiento en GPU ha abierto un abanico de posibilidades para lograr que el arte de la composición musical este al alcance de todos, permitiendo que un espectro más amplio y diverso de personas acceda a él, por eso les presento mi proyecto HarmoniGen The AI Composer. 
+However, with the continuous advancement of technology, the incorporation of GAI (Generative Artificial Intelligence) and GPU processing has opened a range of possibilities to make the art of musical composition available to everyone, allowing a spectrum broader and more diverse number of people can access it, that's why I present my project HarmoniGen The AI Composer.
 
 <img src="https://i.ibb.co/C8WnYwz/image.png" width="700">
 
 # Solution:
 
-HarmoniGen es una solucion para relizar melodias de forma sencilla mediante una entrada de texto gracias a los modelos de Llama.cpp gracias a una interfaz grafica con forma de WebPage.
+HarmoniGen is a solution to make melodies easily through text entry thanks to the Llama.cpp models thanks to a graphical interface in the form of a WebPage.
 
 <img src="https://i.ibb.co/9wgZk30/Image.png" width="700">
 
@@ -46,56 +46,56 @@ This is the connection diagram of the system:
 
 <img src="https://i.ibb.co/1M8hj9F/Harmoni-Gen-drawio.png" width="700">
 
-Todo el sistema esta gestionado por docker compose, el orquestador de contenedores nativo de Docker, mediante el podemos ejecutar los tres contenedores correctamente y configurados para utilizar el runtime de Nvidia.
+The entire system is managed by docker compose, Docker's native container orchestrator, through which we can run the three containers correctly and configured to use the Nvidia runtime.
 
 # System Setup:
 
 ## SDK Manager:
 
-Para hacer funcionar la Jetson Orin Nano debemos realizar el flash de Jetpack en nuestra board, para este proceso se utilizara el SDK Manager para seleccionar los componentes necesarios.
+To make the Jetson Orin Nano work we must flash the Jetpack on our board, for this process the SDK Manager will be used to select the necessary components.
 
 <img src="https://i.ibb.co/jHZ2w4X/image.png" width="700">
 
-Especialmente debes de instalar los NVIDIA Container Runtime, con esto podremos tener docker y el orquestador compose. Versiones anteriores de la version 6.0 DP no contienen compose.
+Especially you must install the NVIDIA Container Runtime, with this we can have docker and the compose orchestrator. Previous versions of version 6.0 DP do not contain compose.
 
 <img src="https://i.ibb.co/JtqdfD3/image.png" width="700">
 
 ## Containers Setup:
 
-Para configurar los contenedores dentro de nuestra board primero tendremos que realizar el proceso de instalacion de jetson-containers.
+To configure the containers within our board we will first have to carry out the jetson-containers installation process.
 
     sudo apt-get update && sudo apt-get install git python3-pip
     git clone --depth=1 https://github.com/dusty-nv/jetson-containers
     cd jetson-containers
     pip3 install -r requirements.txt
 
-Agregamos docker a $USER para poder usar docker sin sudo.
+We added docker to $USER so we can use docker without sudo.
 
     sudo usermod -aG docker $USER
 
-Por ultimo debemos de generar una memoria swap del doble de la memoria ram actual de la board, osea 16GB.
+Finally, we must generate a swap memory twice the current ram memory of the board, that is, 16GB.
 
     sudo systemctl disable nvzramconfig
     sudo fallocate -l 16G /mnt/16GB.swap
     sudo mkswap /mnt/16GB.swap
     sudo swapon /mnt/16GB.swap
 
-Y finalmente para tener los contenedores listos, debes de descargar la carpeta [workstation](./workstation/docker-compose.yml) y correr los siguiente comandos.
+And finally to have the containers ready, you must download the [workstation](./workstation/docker-compose.yml) folder and run the following commands.
 
     cd workstation
     docker compose build
 
-Esto descargara y configurara todos los contenedores para dejarlos listos para funcionar.
+This will download and configure all containers ready to go.
 
 # Orchestrator:
 
-Una vez teniendo todos los contenedores y sistema listos para ejecutar, podremos utilizar el orquestador para iniciar el sistema.
+Once we have all the containers and system ready to run, we can use the orchestrator to start the system.
 
     docker compose up -d
 
-Dentro del archivo docker-compose.yml podremos ver los detalles de ejecucion, aunque hay algunos detalles que hay que resaltar.
+Within the docker-compose.yml file we can see the execution details, although there are some details that must be highlighted.
 
-- Networking: la configuracion del red en la que correran los contenedores sera interna entre ellos, puertos preconfigurados y con una ip estatica.
+- Networking: the network configuration in which the containers run will be internal between them, preconfigured ports and with a static IP.
 
     networks:
         harmonynet:
@@ -104,36 +104,36 @@ Dentro del archivo docker-compose.yml podremos ver los detalles de ejecucion, au
                 config:
                     - subnet: 172.20.0.0/16
 
-- Services: el orquestador gestiona los contenedores como micro servicios. 
-  - MIDI-API: gestiona la creacion de archivos MIDI mediante una API.
-  - NextJS: Provee la interfaz grafica a travez de navegador web, para realizar las melodias.
-  - Llama.cpp: Provee una interfaz API para realizar las invocaciones de llama.
-
+- Services: the orchestrator manages the containers as microservices.
+   - MIDI-API: manages the creation of MIDI files through an API.
+   - NextJS: Provides the graphical interface through a web browser, to make the melodies.
+   - Llama.cpp: Provides an API interface to perform llama invocations.
+     
 # MIDI-API:
 
-Este microservicio tiene como fin generar las melodias y convertirlas en archivos midi, ademas de poder reprodicirlas en el navegador.
+The purpose of this microservice is to generate the melodies and convert them into midi files, in addition to being able to play them in the browser.
 
 ## Mingus Core:
 
-Este modulo provee al proyecto una serie de notaciones y teoria musical para poder generar secuencias de acordes, escalas y notas correctas.
+This module provides the project with a series of notations and musical theory to be able to generate sequences of chords, scales and correct notes.
 
 <img src="https://bspaans.github.io/python-mingus/_images/lpexample.png" width="700">
 
-Especificamente en la musica popular la generacion de melodias y canciones estan basadas mayormente en progresiones de acordes ya conocidos.
+Specifically in popular music, the generation of melodies and songs are based mostly on already known chord progressions.
 
 <img src="https://i.ibb.co/XztrBKX/image.png" width="400">
 
-Programar manualmente todas estas progresiones de acordes es sumamente tedioso, asi que por esta razon, la libreria nos provee de varias herramientas para generar estas progresiones.
+Manually programming all these chord progressions is extremely tedious, so for this reason, the library provides us with several tools to generate these progressions.
 
     chords_progression = progressions.to_chords(progression[selection], data["chordprogression"])
 
 ## Midiutil:
 
-Ya que podemos generar secuencias de acordes y melodias basicas, debemos de tener la capacidad de generar archivos MIDI con estas secuencias y tener la capacidad de reproducirlos. 
+Since we can generate chord sequences and basic melodies, we must have the ability to generate MIDI files with these sequences and have the ability to play them.
 
 <img src="https://i.ibb.co/Vv96rWx/image.png" width="700">
 
-Por lo tanto es importante tener los valores basicos de cada nota, esto nos servira para generar todas las demas. Empezando por el 0 como la nota mas grave del piano, a su vez sus equivalencias en bemoles y sostenidos, debido a la libreria Mignus agregamos tambien las equivalencias de doble bemol y doble sostenido.
+Therefore, it is important to have the basic values of each note, this will help us generate all the others. Starting with 0 as the lowest note on the piano, in turn its equivalences in flats and sharps, due to the Mignus library we also added the equivalences of double flat and double sharp.
 
     note_pitch = {
         "C": 0, "C#": 1, "Db": 1, "C##": 2, "Dbb": 0,
@@ -145,7 +145,7 @@ Por lo tanto es importante tener los valores basicos de cada nota, esto nos serv
         "Cb": 11, "B#": 0, "Cbb": 10
     }
 
-Ahora con estas equivalencias podremos crear los arhivos MIDI a partir de notas musicales.
+Now with these equivalences we can create MIDI files from musical notes.
 
     def note_to_pitch(note_name):
         # Pitch Map
@@ -171,15 +171,15 @@ Ahora con estas equivalencias podremos crear los arhivos MIDI a partir de notas 
 
 ## Fluidsynth:
 
-Ya que podemos proveer archivos MIDI al sistema, tenemos que poder reproducirlos como instrumentos musicales, gracias a esa utilidad de linux es posible reproducir los archivos MIDI como si fueran ejecutados por instrumentos musicales.
+Since we can provide MIDI files to the system, we have to be able to play them as musical instruments. Thanks to this Linux utility it is possible to play MIDI files as if they were played by musical instruments.
 
 <img src="https://i.ibb.co/7tkBwhQ/image.png" width="700">
 
-Para reproducir los instrumentos musicales se utilizan FONTS, las cuales son archivos embebidos con la informacion de los intrumentos musicales, hay varias librerias open source con muchas fonts dinstintas, porfavor agrega las que gustes al sistema para realizar melodias diferentes.
+To play musical instruments, FONTS are used, which are files embedded with information about musical instruments. There are several open source libraries with many different fonts. Please add the ones you like to the system to make different melodies.
 
 https://sites.google.com/site/soundfonts4u/
 
-Los archivos que utilizamos en este proyecto como POC son los siguientes.
+The files that we use in this project as POC are the following.
 
 - [Guitar](https://drive.google.com/file/d/18CCYj8AFy7wpDdGg0ADx8GfTTHEFilrs/view?usp=sharing)
 - [Piano](https://drive.google.com/file/d/1nvTy62-wHGnZ6CKYuPNAiGlKLtWg9Ir9/view?usp=sharing)
@@ -187,11 +187,11 @@ Los archivos que utilizamos en este proyecto como POC son los siguientes.
 
 ## API:
 
-Ya que podemos generar los audios de forma programatica, es mejor tener la capacidad de hacerlo mediante una API, ya que esto failitara la integracion con nuestra interfaz grafica, asi que se utilizo Flask para crear una API.
+Since we can generate the audio programmatically, it is better to have the ability to do it through an API, as this will prevent integration with our graphical interface, so Flask was used to create an API.
 
 <img src="https://i.ibb.co/F7RTDcN/68747470733a2f2f692e6962622e636f2f4c3947775072632f.png" width="700">
 
-Dentro de la aplicacion este microservicio esta corriendo en el puerto 8083 con una ip interna estatica.
+Within the application this microservice is running on port 8083 with a static internal IP.
 
     ports:
         - "8083:8083"
@@ -201,11 +201,11 @@ Dentro de la aplicacion este microservicio esta corriendo en el puerto 8083 con 
 
 # Llama.cpp:
 
-El segundo pilar del proyecto es poder realizar las melodias mediante una interfaz de texto, generando el efecto de tener una interfaz de Text2Music.
+The second pillar of the project is to be able to make the melodies through a text interface, generating the effect of having a Text2Music interface.
 
 <img src="https://i.ibb.co/mqMpf1H/image.png" width="700">
 
-Gracias a el buen trabajo de Llama.cpp este servicio de llama es posible usarlo a traves de un servidor web, asi que realice un microservicio de Llama con el cual puedo realizar las peticiones de generacion de texto mediante API.
+Thanks to the good work of Llama.cpp, this llama service can be used through a web server, so I created a Llama microservice with which I can make text generation requests through the API.
 
     ports:
         - "8080:8080"
@@ -213,11 +213,11 @@ Gracias a el buen trabajo de Llama.cpp este servicio de llama es posible usarlo 
         harmonynet:
             ipv4_address: 172.20.0.4
 
-Ademas este contenedor debe de correr con un comando inicial, ya todo esto esta descrito en el docker-compose.yml.
+In addition, this container must run with an initial command, since all this is described in the docker-compose.yml.
 
     command: /bin/bash -c "./server --model /model/llama-2-7b.Q5_K_M.gguf --ctx-size 512 --batch-size 256 --n-gpu-layers 999 --threads $(nproc) --n-predict 512 --host 172.20.0.4 --port 8080 --alias HarmoniGen"
 
-Con este servicio podemos realizar peticiones API mediante JSON.
+With this service we can make API requests using JSON.
 
     {
         "prompt": `YOUR PROMPT`,
@@ -233,60 +233,60 @@ Con este servicio podemos realizar peticiones API mediante JSON.
         "stop": ["### Examples:", "Examples", "This is", "def", "Where:", '"""', '#', "<div>", "</div>", "The"]
     }
 
-Esta es la descripcion de los parametros y que funcion tiene para la generacion.
+This is the description of the parameters and what function they have for the generation.
 
-- prompt: Este parametro puede variarse para mejorar el resultado, pero es la base de la generacion del texto que se va a generar, en este caso un JSON con los parametros de generacion del MIDI.
-- n_predict: la longitud del texto que se generara.
-- logic_bias: Este parametros va a forzar la AI para generar una respuesta de texto util patra nosotros. 
-- stop: Estas palabras clave detienen la generacion de texto.
+- prompt: This parameter can be varied to improve the result, but it is the basis for the generation of the text that will be generated, in this case a JSON with the MIDI generation parameters.
+- n_predict: the length of the text that will be generated.
+- logic_bias: This parameter will force the AI to generate a useful text response for us.
+- stop: These keywords stop the text generation.
 
-El modelo que utilizamos para este proyecto es llama-2-7b.Q5_K_M.gguf que nos provee segun la documentacion oficial el mejor rendimiento vs costo de procesamiento.
+The model we use for this project is called-2-7b.Q5_K_M.gguf, which provides us, according to the official documentation, with the best performance vs processing cost.
 
 <img src="https://i.ibb.co/NyzmMTS/image.png" width="700">
 
 # NextJS:
 
-Como ultimo eslabon tenemos la interfaz grafica como webpage, utilizando el framework de NextJS.
+As the last link we have the graphical interface as a webpage, using the NextJS framework.
 
 <img src="https://i.ibb.co/0mvL0mL/nextjs3.webp" width="700">
 
 ## API:
 
-Mediante NextJS es posible gestional todo el lado de servidor y la comunicacion entre contendores desde el mismo framework.
+Using NextJS it is possible to manage the entire server side and the communication between containers from the same framework.
 
 <img src="https://i.ibb.co/gybWs6T/image.png" width="700">
 
-Todos los detalles de la API estan en la siguiente carpeta.
+All the API details are in the following folder.
 
 [API](./workstation/nextjs-docker/pages/api/)
 
-Sin embargo hay que aclarar que esta API es parte del servidor, no del cliente, ya que si tratas de acceder a los servicios de los contenedores fuera de estas API, daran un error de CORS ya que estan configurados para funcionar con internal network. Esto se realizo asi ya que esta listo para despliegue en produccion.
+However, it must be clarified that this API is part of the server, not the client, since if you try to access the container services outside of these APIs, they will give a CORS error since they are configured to work with the internal network. This was done as it is ready for deployment in production.
 
 <img src="https://i.ibb.co/1brDqVd/Harmoni-Gen-New-drawio.png" width="400">
 
 ## AI Composer:
 
-La primera seccion de la pagina web es el AI composer, el cual tiene la funcion de generar audios basicos, los cuales podemos elegir los parametros basicos de la medodia y a su vez la AI (el modelo Llama) decidira el resto de prametros de la composicion.
+The first section of the website is the AI composer, which has the function of generating basic audios, which we can choose the basic parameters of the media and in turn the AI (the Llama model) will decide the rest of the parameters of the composition .
 
 <img src="https://i.ibb.co/82KZ4Dg/image.png" width="700">
 
-Poniendo un ejemplo de esto, realizamos una prueba con una cancion muy conocida.
+Giving an example of this, we carried out a test with a very well-known song.
 
 <img src="https://i.ibb.co/Wn3TBsC/image.png" width="700">
 
-Una vez se realiza en archivo la pagina web nos respondera con una alerta de que se realizo correctamente.
+Once the file is done, the website will respond with an alert that it was done correctly.
 
 <img src="https://i.ibb.co/1Z1V90T/image.png" width="700">
 
 ## Manual Composer:
 
-El compositor manual es un bypass de la AI, donde puedes realizar el Finetuning de la melodia si lo crees necesario, no es lo mas recomendable ya que la AI genera la mejor opcion.
+The manual composer is a bypass of the AI, where you can fine-tune the melody if you think it is necessary, it is not the most recommended since the AI generates the best option.
 
 <img src="https://i.ibb.co/3mpPJtC/image.png" width="700">
 
 ## MIDI Player:
 
-Una vez generado el archivo ya podemos reproducirlo en el mismo navegador y usarlo para lo que queramos.
+Once the file is generated, we can play it in the same browser and use it for whatever we want.
 
 <img src="https://i.ibb.co/q017HfF/image.png" width="700">
 
@@ -300,8 +300,6 @@ Video: Click on the image
 [![Video](https://i.ibb.co/ZSSjZtF/Harmoni.png)](pending...)
 
 Sorry github does not allow embed videos.
-
-# Commentary:
 
 
 
