@@ -97,12 +97,12 @@ Within the docker-compose.yml file we can see the execution details, although th
 
 - Networking: the network configuration in which the containers run will be internal between them, preconfigured ports and with a static IP.
 
-    networks:
-        harmonynet:
-            driver: bridge
-            ipam:
-                config:
-                    - subnet: 172.20.0.0/16
+        networks:
+            harmonynet:
+                driver: bridge
+                ipam:
+                    config:
+                        - subnet: 172.20.0.0/16
 
 - Services: the orchestrator manages the containers as microservices.
    - MIDI-API: manages the creation of MIDI files through an API.
